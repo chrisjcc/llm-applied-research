@@ -1,0 +1,7 @@
+# conda create -n sft_env python=3.10
+# conda activate sft_env
+torch==2.8.0
+transformers==4.56.2
+trl==0.23.0
+datasets==4.1.1
+pandas==2.3.2
