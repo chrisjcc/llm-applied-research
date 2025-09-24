@@ -112,6 +112,20 @@ The model generates responses to prompts, which are then scored by a reward func
 
 ---
 
+## Tasks suitable for Reinforcement Fine-Tuning
+
+These tasks benefit from reinforcement fine-tuning because they require verifiable, compositional behavior and prefer explicit reasoning over pattern-matching.
+
+- **Mathematical problem solving**  
+  RF-tuned models can show their work and provide detailed, step-by-step reasoning for calculations instead of only giving a final answer. This makes them better at tracking assumptions, units, edge cases and at producing answers that are easy to verify or reproduce.
+
+- **Code generation and debugging**  
+  With RF, models learn to respect code structure and intent: they generate runnable code, explain design choices, suggest focused tests, and propose minimal, correct fixes for bugs (for example off-by-one errors or incorrect type usage). That makes them more useful for iterative development and review.
+
+- **Logical and multi-step reasoning**  
+  RF shifts the model away from superficial correlations toward explicit chains of logic. Tasks that require planning, constraint satisfaction, or multi-stage inference (for instance algorithm design or formal argumentation) benefit because the model is encouraged to produce clear, auditable reasoning steps.
+
+
 # Summary
 
 - **SFT** teaches execution, but not planning or recovery.  
