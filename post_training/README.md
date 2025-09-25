@@ -141,3 +141,39 @@ A practical recipe:
 - Use **SFT** to bootstrap new behaviors.  
 - Apply **DPO** to refine and correct behavior.  
 - Use **RL** when multi-step reasoning, planning, or exploration is required.
+
+## SFT and RFT/GRPO Training for LLMs
+
+### 1. Hugging Face Transformers + PEFT
+
+**Use case:** Supervised Fine-Tuning (SFT) for LLMs, including parameter-efficient fine-tuning methods like LoRA, adapters, and full model fine-tuning.
+
+**Key components:**
+- `transformers` – for loading and training LLMs.
+- `datasets` – for preprocessing and batching training data.
+- `accelerate` – for distributed GPU/multi-node setups.
+- `peft` – for LoRA, adapters, and P-tuning.
+
+**Example workflow:**  
+Load a base LLM (e.g., Qwen-2.5B, LLaMA-3) → Apply PEFT → Train on labeled input-output pairs → checkpoint model.
+
+---
+
+### 2. TRL (Transformer Reinforcement Learning) / RLHF
+
+**Use case:** Reinforcement Fine-Tuning (RFT) with PPO, GRPO, or Direct Preference Optimization (DPO) for LLMs. This is commonly used for RLHF (Reinforcement Learning with Human Feedback).
+
+**Key components:**
+- [`trl`](https://github.com/lvwerra/trl) – supports PPO, GRPO, and DPO training.
+- Integrates with `transformers` models and `accelerate` for distributed training.
+- Uses reward models or human feedback to shape the LLM outputs.
+
+**Example workflow:**  
+Start with a pre-trained or SFT-tuned LLM → Define a reward function or use a reward model → Train with PPO/GRPO/DPO loop → fine-tuned RLHF model.
+
+---
+
+### Typical Training Pipeline
+
+- **SFT:** Labeled input-output pairs → PEFT/LoRA → SFT → checkpoint  
+- **RFT/GRPO:** Take SFT-tuned model → Reward model → PPO/GRPO/DPO loop → fine-tuned RLHF model
