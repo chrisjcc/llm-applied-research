@@ -74,6 +74,11 @@ The model generates responses to prompts, which are then scored by a reward func
   - RL (or DPO as a lightweight alternative) helps models **plan, retry, and improve**.  
   - Crucial for dealing with uncertainty, errors, and partial observability.
 
+GRPO uses two models to guide the learning process:
+
+- **Reference model**: The base model without LoRA, which remains frozen throughout training.
+- **Policy model**: The model that is trained with LoRA weights, which are continually updated during the learning process.
+
 ---
 
 # Principles of Data Curation
