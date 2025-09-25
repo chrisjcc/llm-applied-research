@@ -6,3 +6,6 @@ trl==0.23.0
 datasets==4.1.1
 pandas==2.3.2
 python-dotenv==1.1.1
+peft==0.15.2
+matplotlib==3.10.1
+weave==0.52.8
