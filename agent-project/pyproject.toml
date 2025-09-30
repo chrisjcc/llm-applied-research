@@ -4,28 +4,8 @@ version = "0.0.1"
 requires-python = ">=3.10"
 
 dependencies = [
-  # Core ML / RL
-  "transformers==4.56.2",
-  "trl==0.23.0",
-  "peft==0.17.1",
-  "datasets==4.1.1",
-  "evaluate==0.4.6",
-  
-  # Utilities
-  "pandas==2.3.2",
-  "python-dotenv==1.1.1",
-  "matplotlib==3.10.1",
-  "rich==14.1.0",
-  "jinja2>=3.1.0",
-  
-  # Acceleration / orchestration
-  "accelerate==1.10.1",
+  "fastmcp",
+  "huggingface-hub>=0.20.0",
   "pydantic==2.11.9",
-  "wandb==0.22.0",
-  
-  # GPU / low-level
-  "bitsandbytes==0.47.0",  # Only if CUDA is available
-
-  # Added by uv
-  "fastmcp"
+  "python-dotenv==1.1.1",
 ]

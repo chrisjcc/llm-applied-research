@@ -1,24 +1,13 @@
 from mcp.server.fastmcp import FastMCP
 from pydantic import Field
-from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
-from peft import PeftModel
+import os
+from huggingface_hub import InferenceClient
 
 # -----------------
-# Load Model
+# Setup HF Client
 # -----------------
-BASE_MODEL = "meta-llama/Meta-Llama-3.1-8B"
-ADAPTER = "chrisjcc/code-llama-3.1-8b-sql-adapter"
-
-tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL)
-model = AutoModelForCausalLM.from_pretrained(BASE_MODEL, device_map="auto")
-model = PeftModel.from_pretrained(model, ADAPTER)
-
-pipe = pipeline(
-    "text-generation",
-    model=model,
-    tokenizer=tokenizer,
-    device_map="auto"
-)
+client = InferenceClient(token=os.getenv("HF_TOKEN"))
+MODEL_ID = "chrisjcc/code-llama-3.1-8b-sql-adapter"
 
 # -----------------
 # Setup MCP Server
@@ -37,18 +26,21 @@ mcp = FastMCP(
 )
 def generate_sql(
     instruction: str = Field(description="Natural language instruction to convert to SQL"),
-    max_length: int = Field(default=256, description="Maximum token length"),
+    max_tokens: int = Field(default=256, description="Maximum token length"),
     temperature: float = Field(default=0.7, description="Sampling temperature")
 ) -> str:
     """Takes a natural language instruction and returns a generated SQL query."""
-    result = pipe(
-        f"User: {instruction}\nAssistant:",
-        max_length=max_length,
+    
+    prompt = f"User: {instruction}\nAssistant:"
+    
+    response = client.text_generation(
+        prompt,
+        model=MODEL_ID,
+        max_new_tokens=max_tokens,
         temperature=temperature,
-        do_sample=True,
-        num_return_sequences=1
     )
-    return result[0]["generated_text"]
+    
+    return response
 
 if __name__ == "__main__":
     mcp.run(transport="streamable-http")
