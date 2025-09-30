@@ -24,7 +24,7 @@ dependencies = [
   "wandb==0.22.0",
   
   # GPU / low-level
-  "bitsandbytes==0.47.0"  # Only if CUDA is available
+  "bitsandbytes==0.47.0",  # Only if CUDA is available
 
   # Added by uv
   "fastmcp"
