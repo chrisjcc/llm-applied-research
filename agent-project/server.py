@@ -1,52 +1,39 @@
-# Deployment
+# server.py - MCP Server calling Hugging Face Inference Endpoint
+import os
+import requests
 from mcp.server.fastmcp import FastMCP
 from pydantic import Field
-import os
-import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
-from peft import PeftModel
-from trl import setup_chat_format
 
 # -----------------
-# Hugging Face setup
+# Hugging Face Endpoint setup
 # -----------------
 HF_TOKEN = os.getenv("HF_TOKEN")
-BASE_MODEL = "meta-llama/Meta-Llama-3.1-8B"
-ADAPTER_MODEL = "chrisjcc/code-llama-3.1-8b-sql-adapter"
 
-# 4-bit quantization config (same as training)
-bnb_config = BitsAndBytesConfig(
-    load_in_4bit=True,
-    bnb_4bit_use_double_quant=True,
-    bnb_4bit_quant_type="nf4",
-    bnb_4bit_compute_dtype=torch.bfloat16,
-)
+# Set custom Hugging Face endpoint (already serving base + adapter)
+HF_ENDPOINT_URL = "https://tfv7x6q2awlkz0v2.us-east-1.aws.endpoints.huggingface.cloud"
 
-# -----------------
-# Load model + tokenizer
-# -----------------
-print("Loading tokenizer...")
-tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL, token=HF_TOKEN)
-tokenizer.padding_side = "right"
-tokenizer.model_max_length = 2048
+def hf_query(prompt: str, max_tokens: int, temperature: float):
+    """Send request to Hugging Face Inference Endpoint."""
+    headers = {
+        "Accept": "application/json",
+        "Authorization": f"Bearer {HF_TOKEN}",
+        "Content-Type": "application/json",
+    }
 
-print("Loading base model...")
-base_model = AutoModelForCausalLM.from_pretrained(
-    BASE_MODEL,
-    token=HF_TOKEN,
-    device_map="auto",
-    torch_dtype=torch.bfloat16,
-    quantization_config=bnb_config,
-)
+    payload = {
+        "inputs": prompt,
+        "parameters": {
+            "max_new_tokens": max_tokens,
+            "temperature": temperature,
+        }
+    }
 
-print("Attaching adapter...")
-model = PeftModel.from_pretrained(base_model, ADAPTER_MODEL, token=HF_TOKEN)
+    response = requests.post(HF_ENDPOINT_URL, headers=headers, json=payload)
 
-# ⚠️ Critical: ensure special tokens and embeddings align with training
-print("Applying chat format...")
-model, tokenizer = setup_chat_format(model, tokenizer)
+    if response.status_code != 200:
+        raise RuntimeError(f"HF Endpoint error {response.status_code}: {response.text}")
 
-model.eval()
+    return response.json()
 
 # -----------------
 # Setup MCP Server
@@ -70,29 +57,18 @@ def generate_sql(
 ) -> str:
     """Takes a natural language instruction and returns a generated SQL query."""
 
-    # Use the chat template (like in training)
-    messages = [
-        {"role": "system", "content": "You are a text to SQL query translator."},
-        {"role": "user", "content": instruction},
-    ]
-    prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+    # Prompt template (minimal, could be improved with few-shots)
+    prompt = f"Translate the following instruction into an SQL query:\nInstruction: {instruction}\nSQL:"
 
-    inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
-    outputs = model.generate(
-        **inputs,
-        max_new_tokens=max_tokens,
-        temperature=temperature,
-        do_sample=True,
-    )
+    result = hf_query(prompt, max_tokens=max_tokens, temperature=temperature)
 
-    result = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    # Hugging Face Inference API returns a list of dicts
+    if isinstance(result, list) and "generated_text" in result[0]:
+        sql_query = result[0]["generated_text"].strip()
+    else:
+        sql_query = str(result)
 
-    # Optionally trim to just the SQL
-    if "SQL:" in result:
-        result = result.split("SQL:")[-1].strip()
-
-    return result
-
+    return sql_query
 
 if __name__ == "__main__":
     mcp.run(transport="streamable-http")
