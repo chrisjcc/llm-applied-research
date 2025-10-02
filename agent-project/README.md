@@ -87,8 +87,8 @@ Then detach the session with Ctrl-b d. This way, training continues even if your
 
 ```mermaid
 flowchart LR
-    A[Local Machine / SSH] -->|Start session| B[Persistent Session (tmux / screen / nohup)]
-    B -->|Run script| C[Training Script: llm_sql_code_generator.py]
-    C -->|Writes logs| D[Log File: idle_shutdown.log]
+    A[Local Machine / SSH] -->|Start session| B[Persistent Session - tmux-screen-nohup]
+    B -->|Run script| C[Training Script - llm_sql_code_generator.py]
+    C -->|Writes logs| D[Log File - idle_shutdown.log]
     C -->|Updates model| E[Base LLM Model - Supervised Fine-Tuned]
 ```
