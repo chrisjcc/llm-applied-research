@@ -63,27 +63,32 @@ SELECT * FROM customers WHERE total_purchases > 1000;
 
 ⚡ **Strategy**: Keep Alphic MCP server lightweight, delegate all heavy compute to Hugging Face Endpoint, ensuring scalability and no local memory issues.
 
-# Run it in the background with nohup (so it keeps running even if you close the terminal):
-nohup ./idle_shutdown.sh > idle_shutdown.log 2>&1 &
+## Running the Training (Supervised Fine-Tuning)
 
-# to check logs:
-tail -f idle_shutdown.log
+### 1. Run idle shutdown script in the background
+This ensures the process keeps running even if you close the terminal:
 
-# Run training in a persistent session
-# To avoid SSH interruptions, 
-# wrap your training command in tmux or screen, 
-# or use a job manager like nohup or slurm. For example:
+    ```bash
+    nohup ./idle_shutdown.sh > idle_shutdown.log 2>&1 &
+    ```
+Check the logs with:
+
+    ```bash
+    tail -f idle_shutdown.log
+    ```
+### 2. Run training in a persistent session
+
+To avoid interruptions over SSH, wrap your training command in a terminal `multiplexer` (`tmux` or `screen`) or use a job manager like `nohup` or `slurm`. For example, using `tmux`:
+```bash
 tmux new -s train
 python llm_sql_code_generator.py
+```
+Then detach the session with Ctrl-b d. This way, training continues even if your SSH session drops.
 
-# Then detach with Ctrl-b d. That way, if your SSH drops, training continues.
-
-
-# The entrypoint for training job is
-python -m tools.finetune_agent_llm
-
-# Running python tools/finetune_agent_llm.py directly might cause relative import errors.
-
-# Alternative (if we set PYTHONPATH)
-PYTHONPATH=src python tools/finetune_agent_llm.py
-
+```mermaid
+flowchart LR
+    A[Local Machine / SSH] -->|Start session| B[Persistent Session (tmux / screen / nohup)]
+    B -->|Run script| C[Training Script: llm_sql_code_generator.py]
+    C -->|Writes logs| D[Log File: idle_shutdown.log]
+    C -->|Updates model| E[Base LLM Model - Supervised Fine-Tuned]
+```
