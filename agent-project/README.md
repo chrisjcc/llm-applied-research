@@ -13,10 +13,10 @@ This separation avoids Alphic’s memory constraints by offloading model executi
 
 ```mermaid
 flowchart LR
-    A["MCP Client (Alphic)"] -->| "tool call: generate_sql" | B["Alphic MCP Server"]
-    B -->| "REST call with HF_TOKEN" | C["Hugging Face Endpoint (Base + Adapter)"]
-    C -->| "Generated SQL" | B
-    B -->| "Response" | A
+    A[MCP Client (Alphic)] --> B[Alphic MCP Server]
+    B --> C[Hugging Face Endpoint (Base + Adapter)]
+    C --> B
+    B --> A
 ```
 #### Setup
 
