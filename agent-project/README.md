@@ -13,8 +13,8 @@ This separation avoids Alphic’s memory constraints by offloading model executi
 
 ```mermaid
 flowchart LR
-    A[MCP Client (Alphic)] --> B[Alphic MCP Server]
-    B --> C[Hugging Face Endpoint (Base + Adapter)]
+    A[MCP Client - Alphic] --> B[Alphic MCP Server]
+    B --> C[Hugging Face Endpoint - Base + Adapter]
     C --> B
     B --> A
 ```
