@@ -21,8 +21,8 @@ flowchart LR
 #### Setup
 
 1. **Deploy the Hugging Face Endpoint**
-- Make sure your adapter (chrisjcc/code-llama-3.1-8b-sql-adapter) is attached to the base (meta-llama/Meta-Llama-3.1-8B) as a custom endpoint.
-- Note the endpoint URL (e.g. https://<your-endpoint>.aws.endpoints.huggingface.cloud).
+- Make sure your adapter (`chrisjcc/code-llama-3.1-8b-sql`) is attached to the base (`meta-llama/Meta-Llama-3.1-8B`) as a custom endpoint.
+- Note the endpoint URL (e.g. `https://<your-endpoint>.aws.endpoints.huggingface.cloud`).
 
 2. **Configure Environment**
    ```bash
